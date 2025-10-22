@@ -1,0 +1,183 @@
+/* Style chung cho toàn trang */
+body {
+    font-family: Arial, sans-serif; /* Sử dụng font chữ dễ đọc */
+    line-height: 1.6; /* Tăng chiều cao dòng để dễ đọc hơn */
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4; /* Màu nền xám nhạt cho trang */
+    color: #333; /* Màu chữ chính */
+}
+
+/* Styling cho Header và Navigation */
+header {
+    background-color: #333; /* Nền tối cho header */
+    color: #fff; /* Chữ trắng */
+    padding: 1rem 0;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 2.5rem;
+}
+
+nav ul {
+    padding: 0;
+    margin: 10px 0 0 0;
+    list-style: none; /* Bỏ dấu chấm đầu dòng của danh sách */
+    display: flex; /* Dùng flexbox để tạo menu ngang */
+    justify-content: center; /* Căn giữa các mục menu */
+}
+
+nav ul li {
+    margin: 0 20px; /* Khoảng cách giữa các mục menu */
+}
+
+nav ul li a {
+    color: #fff;
+    text-decoration: none; /* Bỏ gạch chân của link */
+    font-size: 1.1rem;
+}
+
+nav ul li a:hover {
+    text-decoration: underline; /* Thêm gạch chân khi di chuột qua */
+}
+
+
+/* Styling cho phần Main Content */
+main {
+    max-width: 1200px; /* Giới hạn chiều rộng nội dung chính */
+    margin: 20px auto; /* Căn giữa nội dung và tạo khoảng cách trên dưới */
+    padding: 0 20px; /* Thêm padding hai bên */
+}
+
+section {
+    margin-bottom: 30px; /* Khoảng cách giữa các section */
+    background: #fff; /* Nền trắng cho các section */
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Thêm bóng đổ nhẹ */
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+
+/* Danh sách sản phẩm (Product List Layout) */
+#product-list {
+    display: flex; /* Sử dụng Flexbox để chia cột */
+    flex-wrap: wrap; /* Cho phép các item xuống dòng nếu không đủ chỗ */
+    gap: 20px; /* Khoảng cách giữa các sản phẩm */
+}
+
+.product-item {
+    flex: 1 1 30%; /* Mỗi sản phẩm chiếm ~30% chiều ngang, co giãn linh hoạt */
+    box-sizing: border-box; /* Đảm bảo padding và border không làm tăng kích thước */
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 5px;
+    background: #fafafa;
+    text-align: center;
+    display: flex;
+    flex-direction: column; /* Sắp xếp nội dung bên trong theo chiều dọc */
+}
+
+.product-item img {
+    max-width: 100%; /* Đảm bảo ảnh không tràn ra ngoài */
+    height: auto;
+    border-radius: 5px;
+    margin-top: auto; /* Đẩy ảnh xuống dưới cùng của flex container */
+}
+
+.product-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.product-price {
+    font-weight: bold;
+    color: #d9534f; /* Màu đỏ nổi bật cho giá */
+    font-size: 1.2rem;
+}
+
+
+/* Form và Footer */
+form {
+    max-width: 500px; /* Giới hạn chiều rộng của form */
+    margin: 20px auto; /* Căn giữa form */
+}
+
+form div {
+    margin-bottom: 15px;
+}
+
+form label {
+    display: block; /* Nhãn hiển thị trên một dòng riêng */
+    margin-bottom: 5px;
+}
+
+form input[type="text"],
+form input[type="email"],
+form textarea {
+    width: 100%; /* Ô nhập liệu chiếm toàn bộ chiều rộng */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Giữ kích thước ổn định */
+}
+
+button[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: 10px 15px;
+    border: none;
+    background-color: #5cb85c; /* Màu nền xanh cho nút */
+    color: white;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer; /* Biểu tượng con trỏ khi di chuột */
+    transition: background-color 0.3s ease; /* Hiệu ứng chuyển màu */
+}
+
+button[type="submit"]:hover {
+    background-color: #4cae4c; /* Màu nền đậm hơn khi di chuột qua */
+}
+
+footer {
+    text-align: center;
+    padding: 20px 0;
+    background-color: #333;
+    color: #aaa; /* Màu chữ xám nhạt */
+    margin-top: 30px;
+}
+
+footer p {
+    margin: 5px 0;
+}
+
+
+/* Thiết kế Responsive cho màn hình nhỏ (Mobile) */
+@media (max-width: 768px) {
+    #product-list {
+        flex-direction: column; /* Chuyển layout sản phẩm thành 1 cột */
+    }
+
+    /* .product-item không cần thay đổi flex vì đã có flex-direction: column ở trên */
+
+    nav ul {
+        flex-direction: column; /* Chuyển menu thành menu dọc */
+        align-items: center; /* Căn giữa các mục menu */
+    }
+
+    nav ul li {
+        margin: 8px 0; /* Khoảng cách dọc cho các mục menu */
+    }
+    
+    header h1 {
+        font-size: 2rem; /* Giảm kích thước tiêu đề trên mobile */
+    }
+}

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <!-- Khai báo bộ mã ký tự UTF-8 để hiển thị tiếng Việt chính xác -->
+    <meta charset="UTF-8">
+
+    <!-- Thêm thẻ meta viewport để hỗ trợ thiết kế responsive -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Đặt tiêu đề cho trang web -->
+    <title>Cửa hàng Cà phê Huyền Trang</title>
+
+    <!-- Liên kết đến file style.css -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <!-- Tên cửa hàng sử dụng thẻ <h1> -->
+        <h1>Cửa hàng Cà phê Huyền Trang</h1>
+
+        <!-- Thanh điều hướng -->
+        <nav>
+            <ul>
+                <li><a href="#">Trang chủ</a></li>
+                <li><a href="#">Sản phẩm</a></li>
+                <li><a href="#">Liên hệ</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Một section để giới thiệu ngắn về cửa hàng -->
+        <section>
+            <h2>Hương vị đánh thức mọi giác quan</h2>
+            <p>Chào mừng đến với Cà phê Huyền Trang, nơi chúng tôi mang đến những hạt cà phê hảo hạng được tuyển chọn kỹ lưỡng và rang xay bằng cả tâm huyết.</p>
+        </section>
+
+        <h2>Thực đơn của chúng tôi</h2>
+
+        <!-- Chức năng tìm kiếm và thêm sản phẩm -->
+        <section class="controls">
+            <input type="text" id="searchInput" placeholder="Tìm kiếm sản phẩm theo tên...">
+            <button id="searchBtn">Tìm</button>
+            <button id="addProductBtn">Thêm sản phẩm</button>
+        </section>
+
+        <!-- Form thêm sản phẩm (ẩn mặc định) -->
+        <section id="addProductForm">
+            <h3>Thêm sản phẩm mới</h3>
+            <!-- Form được gán ID để dễ dàng reset -->
+            <form id="productForm"> 
+                <div>
+                    <label for="newProductName">Tên sản phẩm:</label>
+                    <input type="text" id="newProductName" name="newProductName" required>
+                </div>
+                <div>
+                    <label for="newProductDescription">Mô tả:</label>
+                    <textarea id="newProductDescription" name="newProductDescription" rows="3" required></textarea>
+                </div>
+                <div>
+                    <label for="newProductPrice">Giá (VD: 55,000₫):</label>
+                    <input type="text" id="newProductPrice" name="newProductPrice" required>
+                </div>
+                <div>
+                    <label for="newProductImage">URL hình ảnh:</label>
+                    <input type="text" id="newProductImage" name="newProductImage">
+                </div>
+                <br>
+
+                <!-- Phần tử để hiển thị thông báo lỗi -->
+                <p id="errorMsg" class="error-message"></p>
+
+                <!-- Nút submit đã có trong form -->
+                <button type="submit">Lưu sản phẩm</button>
+
+                <!-- Thêm nút Hủy với type="button" để không submit form -->
+                <button type="button" id="cancelBtn">Hủy</button>
+            </form>
+        </section>
+        
+        <!-- Một section khác để chứa danh sách sản phẩm -->
+        <!-- Thêm ID cho section sản phẩm -->
+        <section id="product-list">
+
+        </section>
+
+        <!-- Form liên hệ đơn giản -->
+        <section>
+            <h2>Đăng ký nhận tin</h2>
+            <p>Để lại thông tin để nhận những ưu đãi mới nhất từ chúng tôi!</p>
+
+            <!-- Sử dụng thẻ <form> với các trường và nhãn mô tả -->
+            <form>
+                <div>
+                    <label for="name">Họ và tên:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <br>
+                <div>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <br>
+                <div>
+                    <label for="message">Lời nhắn:</label>
+                    <textarea id="message" name="message" rows="4"></textarea>
+                </div>
+                <br>
+                <button type="submit">Gửi</button>
+            </form>
+        </section>    
+    </main>
+
+    <!-- Phần Footer - Chân trang -->
+    <footer>
+        <p>&copy; 2025 Cửa hàng Cà phê Huyền Trang.</p>
+        <p>Địa chỉ: 1 Đại Cồ Việt, Bách Khoa, Hà Nội</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>

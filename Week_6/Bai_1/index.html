@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <!-- Khai báo bộ mã ký tự UTF-8 để hiển thị tiếng Việt chính xác -->
+    <meta charset="UTF-8">
+
+    <!-- Thêm thẻ meta viewport để hỗ trợ thiết kế responsive -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Đặt tiêu đề cho trang web -->
+    <title>Cửa hàng Cà phê Huyền Trang</title>
+</head>
+<body>
+    <header>
+        <!-- Tên cửa hàng sử dụng thẻ <h1> -->
+        <h1>Cửa hàng Cà phê Huyền Trang</h1>
+
+        <!-- Thanh điều hướng -->
+        <nav>
+            <ul>
+                <li><a href="#">Trang chủ</a></li>
+                <li><a href="#">Sản phẩm</a></li>
+                <li><a href="#">Liên hệ</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Một section để giới thiệu ngắn về cửa hàng -->
+        <section>
+            <h2>Hương vị đánh thức mọi giác quan</h2>
+            <p>Chào mừng đến với Cà phê Huyền Trang, nơi chúng tôi mang đến những hạt cà phê hảo hạng được tuyển chọn kỹ lưỡng và rang xay bằng cả tâm huyết.</p>
+        </section>
+
+        <!-- Một section để chứa danh sách sản phẩm -->
+        <section>
+            <h2>Thực đơn của chúng tôi</h2>
+
+            <!-- Mỗi sản phẩm được đặt trong một thẻ <article> riêng biệt -->
+            <article>
+                <h3>Espresso</h3>
+                <p>Một tách espresso đậm đà, được chiết xuất từ những hạt cà phê Arabica chất lượng cao.</p>
+                <p>Giá: 35,000₫</p>
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR5Wn8Q4lflLouLLYM-xg7LnKBK2yLAvSn7ww&s" alt="Cốc Espresso nóng hổi">
+            </article>
+
+            <article>
+                <h3>Latte</h3>
+                <p>Sự kết hợp hoàn hảo giữa espresso và sữa nóng, được tô điểm bằng một lớp bọt sữa mịn màng.</p>
+                <p>Giá: 45,000₫</p>
+                <img src="https://vinbarista.com/uploads/news/ca-phe-latte-la-gi-latte-co-vi-gi-latte-khac-gi-capuchino-202408161122.jpg" alt="Cốc Latte thơm ngon">
+            </article>
+
+            <article>
+                <h3>Cappuccino</h3>
+                <p>Hương vị cà phê cân bằng giữa espresso, sữa nóng và lớp bọt sữa dày, bồng bềnh.</p>
+                <p>Giá: 50,000₫</p>
+                <img src="https://cdn.tgdd.vn/2021/11/CookRecipe/CookTipsNote/ca-phe-capuchino-la-gi-cach-uong-cafe-capuchino-va-cac-loai-tipsnote-800x450.jpg" alt="Cốc Cappuccino hấp dẫn">
+            </article>
+        </section>
+
+        <!-- Form liên hệ đơn giản -->
+        <section>
+            <h2>Đăng ký nhận tin</h2>
+            <p>Để lại thông tin để nhận những ưu đãi mới nhất từ chúng tôi!</p>
+
+            <!-- Sử dụng thẻ <form> với các trường và nhãn mô tả -->
+            <form>
+                <div>
+                    <label for="name">Họ và tên:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <br>
+                <div>
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <br>
+                <div>
+                    <label for="message">Lời nhắn:</label>
+                    <textarea id="message" name="message" rows="4"></textarea>
+                </div>
+                <br>
+                <button type="submit">Gửi</button>
+            </form>
+        </section>    
+    </main>
+
+    <!-- Phần Footer - Chân trang -->
+    <footer>
+        <p>&copy; 2025 Cửa hàng Cà phê Huyền Trang.</p>
+        <p>Địa chỉ: 1 Đại Cồ Việt, Bách Khoa, Hà Nội</p>
+    </footer>
+</body>
