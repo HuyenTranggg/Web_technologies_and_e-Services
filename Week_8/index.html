@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>React CRUD - Quản Lý Người Dùng</title>
+
+  <!-- BƯỚC 1.2: Thêm các thư viện React, ReactDOM, và Babel qua CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- BƯỚC 8: Thêm CSS cho giao diện và Modal -->
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      padding: 20px;
+    }
+
+    h1, h4 {
+      color: #2c3e50;
+    }
+
+    #root {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    input[type="text"], input[type="email"] {
+      width: calc(100% - 20px);
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 5px;
+      font-weight: bold;
+    }
+
+    .btn-add {
+      background-color: #28a745;
+      color: white;
+    }
+    .btn-edit {
+      background-color: #ffc107;
+      color: #333;
+    }
+    .btn-delete {
+      background-color: #dc3545;
+      color: white;
+    }
+    .btn-save {
+      background-color: #007bff;
+      color: white;
+    }
+
+    /* CSS cho Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      width: 400px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- BƯỚC 1.1: Khung HTML cơ bản với thẻ div root -->
+  <div id="root"></div>
+
+  <!-- BƯỚC 1.3: Viết mã React trong thẻ script với type="text/babel" -->
+  <script type="text/babel">
+    
+    // BƯỚC 3: COMPONENT TÌM KIẾM (SEARCHFORM)
+    // Component này chỉ có một ô input để nhận từ khóa tìm kiếm.
+    // Dữ liệu từ input được truyền lên component cha (App) thông qua callback `onChangeValue`.
+    function SearchForm({ onChangeValue }) {
+      return (
+        <input
+          type="text"
+          placeholder="Tìm theo tên hoặc username..."
+          // Sự kiện onChange kích hoạt callback, truyền giá trị của input lên App component
+          onChange={(e) => onChangeValue(e.target.value)}
+        />
+      );
+    }
+
+    // BƯỚC 5: COMPONENT THÊM NGƯỜI DÙNG (ADDUSER)
+    // Component này là một form để thêm người dùng mới.
+    // Nó quản lý state nội bộ cho form và sử dụng modal để hiển thị.
+    function AddUser({ onAdd }) {
+      // State để kiểm soát việc hiển thị modal thêm người dùng
+      const [adding, setAdding] = React.useState(false);
+
+      // State để lưu trữ thông tin người dùng đang được nhập vào form
+      // Bao gồm cả state lồng nhau (nested state) cho 'address'
+      const [user, setUser] = React.useState({
+        name: "", username: "", email: "",
+        address: { street: "", suite: "", city: "" },
+        phone: "", website: ""
+      });
+
+      // Hàm xử lý khi giá trị của các trường input thay đổi
+      const handleChange = (e) => {
+        const { id, value } = e.target;
+        // Xử lý state lồng nhau cho address
+        if (["street", "suite", "city"].includes(id)) {
+          setUser(prevUser => ({
+            ...prevUser,
+            // Dùng Spread Operator (...) để sao chép đối tượng address cũ
+            // và chỉ cập nhật trường đang thay đổi, tránh làm mất dữ liệu
+            address: { ...prevUser.address, [id]: value }
+          }));
+        } else {
+          // Cập nhật các trường thông thường
+          setUser(prevUser => ({ ...prevUser, [id]: value }));
+        }
+      };
+
+      // Hàm xử lý khi người dùng nhấn nút "Thêm mới"
+      const handleAdd = () => {
+        // Kiểm tra các trường bắt buộc
+        if (user.name === "" || user.username === "") {
+          alert("Vui lòng nhập Tên và Username!");
+          return;
+        }
+        // Gọi callback onAdd để truyền dữ liệu người dùng mới lên App component
+        onAdd(user);
+        // Reset lại form về trạng thái ban đầu
+        setUser({
+          name: "", username: "", email: "",
+          address: { street: "", suite: "", city: "" },
+          phone: "", website: ""
+        });
+        // Đóng modal sau khi thêm thành công
+        setAdding(false);
+      };
+
+      return (
+        <div>
+          <button className="btn-add" onClick={() => setAdding(true)}>Thêm người dùng mới</button>
+          
+          {/* Khi `adding` là true, hiển thị modal */}
+          {adding && (
+            <div className="modal-overlay">
+              <div className="modal-content">
+                <h4>Thêm người dùng</h4>
+                <input id="name" type="text" placeholder="Tên" value={user.name} onChange={handleChange} />
+                <input id="username" type="text" placeholder="Username" value={user.username} onChange={handleChange} />
+                <input id="email" type="email" placeholder="Email" value={user.email} onChange={handleChange} />
+                <input id="street" type="text" placeholder="Tên đường" value={user.address.street} onChange={handleChange} />
+                <input id="city" type="text" placeholder="Thành phố" value={user.address.city} onChange={handleChange} />
+                <button className="btn-save" onClick={handleAdd}>Thêm mới</button>
+                <button onClick={() => setAdding(false)}>Hủy</button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    // BƯỚC 4, 6, 7: COMPONENT BẢNG KẾT QUẢ (RESULTTABLE)
+    // Component này chịu trách nhiệm hiển thị, lọc, sửa và xóa người dùng.
+    function ResultTable({ keyword, user, onAdded }) {
+      // State lưu danh sách tất cả người dùng
+      const [users, setUsers] = React.useState([]);
+      // State kiểm soát trạng thái đang tải dữ liệu
+      const [loading, setLoading] = React.useState(true);
+      // State lưu thông tin người dùng đang được chỉnh sửa (null nếu không có ai)
+      const [editing, setEditing] = React.useState(null);
+
+      // BƯỚC 4.1: Tải dữ liệu từ API một lần duy nhất khi component được mount
+      // Dependency array là [], nên useEffect này chỉ chạy 1 lần.
+      React.useEffect(() => {
+        fetch("https://jsonplaceholder.typicode.com/users")
+          .then(res => res.json())
+          .then(data => {
+            setUsers(data); // Lưu dữ liệu vào state
+            setLoading(false); // Cập nhật trạng thái loading
+          });
+      }, []);
+
+      // BƯỚC 5.4: Lắng nghe sự thay đổi của prop `user` (người dùng mới)
+      // Khi App component truyền một người dùng mới vào, thêm người dùng đó vào danh sách
+      React.useEffect(() => {
+        if (user) {
+          // Thêm người dùng mới vào đầu danh sách
+          // Gán id mới cho user (vì API giả không tự tăng id)
+          setUsers((prev) => [{ ...user, id: prev.length > 0 ? Math.max(...prev.map(u => u.id)) + 1 : 1 }, ...prev]);
+          onAdded(); // Gọi callback để reset state `newUser` trong App
+        }
+      }, [user]);
+
+      // BƯỚC 7: Hàm xóa người dùng
+      const removeUser = (id) => {
+        if (window.confirm("Bạn có chắc chắn muốn xóa người dùng này?")) {
+            // Dùng filter() để tạo một mảng mới không chứa người dùng có id cần xóa
+            setUsers((prev) => prev.filter((u) => u.id !== id));
+        }
+      };
+      
+      // BƯỚC 6.3: Hàm kích hoạt chế độ chỉnh sửa
+      const editUser = (userToEdit) => {
+        // Sao chép sâu (deep copy) đối tượng user để tránh thay đổi trực tiếp state gốc
+        // Đây là kỹ thuật quan trọng để tránh tham chiếu
+        setEditing({ ...userToEdit, address: { ...userToEdit.address } });
+      };
+
+      // BƯỚC 6.4: Hàm xử lý khi người dùng thay đổi dữ liệu trên form sửa
+      const handleEditChange = (field, value) => {
+         // Tương tự hàm handleChange của AddUser, xử lý cả state lồng nhau
+         if (["street", "suite", "city"].includes(field)) {
+            setEditing(prev => ({ ...prev, address: { ...prev.address, [field]: value } }));
+         } else {
+            setEditing(prev => ({ ...prev, [field]: value }));
+         }
+      };
+
+      // BƯỚC 6.5: Hàm lưu lại thông tin sau khi chỉnh sửa
+      const saveUser = () => {
+        // Dùng map() để tìm người dùng có id tương ứng và thay thế bằng đối tượng `editing`
+        setUsers(prev => prev.map(u => u.id === editing.id ? editing : u));
+        setEditing(null); // Thoát khỏi chế độ chỉnh sửa
+      };
+
+      // BƯỚC 4.4: Lọc danh sách người dùng dựa trên keyword từ props
+      const filteredUsers = users.filter(
+        (u) =>
+          u.name.toLowerCase().includes(keyword.toLowerCase()) ||
+          u.username.toLowerCase().includes(keyword.toLowerCase())
+      );
+
+      if (loading) return <p>Đang tải dữ liệu...</p>;
+
+      return (
+        <>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tên</th>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Thành phố</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          {/* BƯỚC 4.5: Hiển thị dữ liệu đã lọc bằng hàm map */}
+          <tbody>
+            {filteredUsers.map((u) => (
+              <tr key={u.id}>
+                <td>{u.id}</td>
+                <td>{u.name}</td>
+                <td>{u.username}</td>
+                <td>{u.email}</td>
+                <td>{u.address.city}</td>
+                <td>
+                  <button className="btn-edit" onClick={() => editUser(u)}>Sửa</button>
+                  <button className="btn-delete" onClick={() => removeUser(u.id)}>Xóa</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {/* BƯỚC 6: Modal để chỉnh sửa người dùng */}
+        {editing && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <h4>Chỉnh sửa người dùng</h4>
+              <input type="text" placeholder="Tên" value={editing.name} onChange={(e) => handleEditChange('name', e.target.value)} />
+              <input type="text" placeholder="Username" value={editing.username} onChange={(e) => handleEditChange('username', e.target.value)} />
+              <input type="email" placeholder="Email" value={editing.email} onChange={(e) => handleEditChange('email', e.target.value)} />
+              <input type="text" placeholder="Thành phố" value={editing.address.city} onChange={(e) => handleEditChange('city', e.target.value)} />
+              <button className="btn-save" onClick={saveUser}>Lưu</button>
+              <button onClick={() => setEditing(null)}>Hủy</button>
+            </div>
+          </div>
+        )}
+        </>
+      );
+    }
+    
+    // BƯỚC 2: COMPONENT GỐC (APP)
+    // Component cha, quản lý state tập trung và luồng dữ liệu của ứng dụng.
+    function App() {
+      // State lưu từ khóa tìm kiếm, được chia sẻ giữa SearchForm và ResultTable
+      const [kw, setKeyword] = React.useState("");
+      // State lưu người dùng mới được thêm, dùng để truyền từ AddUser sang ResultTable
+      const [newUser, setNewUser] = React.useState(null);
+
+      return (
+        <div>
+          <h1>Quản lý người dùng (CRUD)</h1>
+
+          {/* Truyền callback `setKeyword` xuống SearchForm */}
+          <SearchForm onChangeValue={setKeyword} />
+          
+          <hr/>
+          
+          {/* Truyền callback `setNewUser` xuống AddUser */}
+          <AddUser onAdd={setNewUser} />
+          
+          {/* Truyền `kw`, `newUser` và một callback để reset `newUser` xuống ResultTable */}
+          <ResultTable 
+            keyword={kw} 
+            user={newUser} 
+            onAdded={() => setNewUser(null)} 
+          />
+        </div>
+      );
+    }
+
+    // BƯỚC 1.4: Render component App vào thẻ div#root
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+
+  </script>
+</body>
+
+</html>
