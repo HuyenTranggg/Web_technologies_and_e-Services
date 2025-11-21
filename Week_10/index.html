@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bài tập CRUD User</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f6f8;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #0056b3;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            color: white;
+            margin-right: 5px;
+        }
+        .btn-edit { background-color: #ffc107; }
+        .btn-delete { background-color: #dc3545; }
+        .btn-add { background-color: #28a745; margin-bottom: 20px; }
+        .btn-save { background-color: #007bff; }
+        .btn-cancel { background-color: #6c757d; }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        #searchInput {
+            padding: 8px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .pagination button {
+            background-color: #007bff;
+            margin: 0 5px;
+        }
+        .pagination button.active {
+            background-color: #0056b3;
+        }
+        .pagination button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+        form label {
+            display: block;
+            margin-top: 10px;
+        }
+        form input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .error-message {
+            color: #dc3545;
+            padding: 10px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Quản lý Người dùng</h1>
+
+        <!-- Thông báo lỗi -->
+        <div id="errorMessage" class="error-message"></div>
+
+        <!-- Điều khiển: Nút thêm và ô tìm kiếm -->
+        <div class="controls">
+            <button id="addUserBtn" class="btn-add">Thêm người dùng mới</button>
+            <input type="text" id="searchInput" placeholder="Tìm kiếm theo tên...">
+        </div>
+
+        <!-- Bảng người dùng -->
+        <table id="userTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên</th>
+                    <th>Email</th>
+                    <th>Điện thoại</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dữ liệu người dùng sẽ được chèn vào đây -->
+            </tbody>
+        </table>
+
+        <!-- Điều khiển phân trang -->
+        <div id="pagination" class="pagination"></div>
+    </div>
+
+    <!-- Modal Thêm/Sửa người dùng -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Thêm người dùng mới</h2>
+            <form id="userForm">
+                <input type="hidden" id="userId">
+                <label for="name">Tên:</label>
+                <input type="text" id="name" required>
+                <label for="email">Email:</label>
+                <input type="email" id="email" required>
+                <label for="phone">Điện thoại:</label>
+                <input type="text" id="phone" required>
+                <div style="margin-top: 20px;">
+                    <button type="submit" class="btn-save">Lưu</button>
+                    <button type="button" id="cancelBtn" class="btn-cancel">Hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://jsonplaceholder.typicode.com/users';
+
+        // Các biến trạng thái
+        let allUsers = []; // Lưu trữ tất cả người dùng từ API
+        let filteredUsers = []; // Lưu trữ người dùng sau khi tìm kiếm
+        let currentPage = 1; // Trang hiện tại
+        const rowsPerPage = 5; // Số dòng mỗi trang
+
+        // Các phần tử DOM
+        const tableBody = document.querySelector('#userTable tbody');
+        const searchInput = document.getElementById('searchInput');
+        const paginationContainer = document.getElementById('pagination');
+        const modal = document.getElementById('userModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const userForm = document.getElementById('userForm');
+        const addUserBtn = document.getElementById('addUserBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // --- 1. Các hàm API ---
+        
+        // Hiển thị thông báo lỗi
+        const showError = (message) => {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        };
+
+        // READ: Lấy tất cả người dùng từ API
+        const fetchUsers = async () => {
+            try {
+                const response = await fetch(API_URL);
+                if (!response.ok) {
+                    throw new Error(`Lỗi HTTP! trạng thái: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error("Không thể lấy dữ liệu người dùng:", error);
+                showError("Không thể lấy dữ liệu người dùng. Vui lòng thử lại sau.");
+                return []; // Trả về mảng rỗng khi có lỗi
+            }
+        };
+        
+        // CREATE: Thêm người dùng mới
+        const addUser = async (user) => {
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(user),
+                });
+                if (!response.ok) {
+                    throw new Error(`Lỗi HTTP! trạng thái: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error("Lỗi khi thêm người dùng:", error);
+                showError("Lỗi khi thêm người dùng. Vui lòng thử lại.");
+                throw error;
+            }
+        };
+
+        // UPDATE: Chỉnh sửa người dùng hiện có
+        const updateUser = async (id, user) => {
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(user),
+                });
+                if (!response.ok) {
+                    throw new Error(`Lỗi HTTP! trạng thái: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error("Lỗi khi cập nhật người dùng:", error);
+                showError("Lỗi khi cập nhật người dùng. Vui lòng thử lại.");
+                throw error;
+            }
+        };
+        
+        // DELETE: Xóa người dùng
+        const deleteUser = async (id) => {
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE',
+                });
+                if (!response.ok) {
+                    throw new Error(`Lỗi HTTP! trạng thái: ${response.status}`);
+                }
+                return true;
+            } catch (error) {
+                console.error("Lỗi khi xóa người dùng:", error);
+                showError("Lỗi khi xóa người dùng. Vui lòng thử lại.");
+                throw error;
+            }
+        };
+
+
+        // --- 2. Các hàm hiển thị giao diện ---
+
+        // Hiển thị bảng người dùng cho trang hiện tại
+        const renderTable = () => {
+            tableBody.innerHTML = ''; // Xóa bảng
+            
+            // Tính toán phần người dùng cho trang hiện tại
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+
+            if (paginatedUsers.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="5" style="text-align: center;">Không tìm thấy người dùng nào</td>';
+                tableBody.appendChild(row);
+                return;
+            }
+
+            paginatedUsers.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.name}</td>
+                    <td>${user.email}</td>
+                    <td>${user.phone}</td>
+                    <td>
+                        <button class="btn-edit" data-id="${user.id}">Sửa</button>
+                        <button class="btn-delete" data-id="${user.id}">Xóa</button>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        };
+
+        // Hiển thị các nút phân trang
+        const renderPagination = () => {
+            paginationContainer.innerHTML = '';
+            const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
+            
+            if (totalPages <= 1) return;
+
+            // Nút Trước
+            const prevBtn = document.createElement('button');
+            prevBtn.textContent = '← Trước';
+            prevBtn.disabled = currentPage === 1;
+            prevBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    renderTable();
+                    renderPagination();
+                }
+            });
+            paginationContainer.appendChild(prevBtn);
+
+            // Các nút số trang
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.textContent = i;
+                if (i === currentPage) {
+                    pageBtn.classList.add('active');
+                }
+                pageBtn.addEventListener('click', () => {
+                    currentPage = i;
+                    renderTable();
+                    renderPagination();
+                });
+                paginationContainer.appendChild(pageBtn);
+            }
+
+            // Nút Sau
+            const nextBtn = document.createElement('button');
+            nextBtn.textContent = 'Sau →';
+            nextBtn.disabled = currentPage === totalPages;
+            nextBtn.addEventListener('click', () => {
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    renderTable();
+                    renderPagination();
+                }
+            });
+            paginationContainer.appendChild(nextBtn);
+        };
+
+        // --- 3. Xử lý sự kiện ---
+        
+        // Xử lý tìm kiếm
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            filteredUsers = allUsers.filter(user => 
+                user.name.toLowerCase().includes(searchTerm)
+            );
+            currentPage = 1; // Đặt lại về trang đầu khi tìm kiếm mới
+            renderTable();
+            renderPagination();
+        });
+
+        // Xử lý click vào nút Sửa/Xóa (Ủy quyền sự kiện)
+        tableBody.addEventListener('click', async (e) => {
+            const target = e.target;
+            const id = parseInt(target.dataset.id);
+            
+            if (target.classList.contains('btn-edit')) {
+                const user = allUsers.find(u => u.id === id);
+                if (user) {
+                    openModal('edit', user);
+                }
+            }
+            
+            if (target.classList.contains('btn-delete')) {
+                if (confirm('Bạn có chắc chắn muốn xóa người dùng này?')) {
+                    try {
+                        await deleteUser(id);
+                        // Cập nhật giao diện thủ công sau DELETE
+                        allUsers = allUsers.filter(u => u.id !== id);
+                        filterAndRender();
+                        alert('Xóa người dùng thành công!');
+                    } catch (error) {
+                        // Lỗi đã được xử lý trong hàm deleteUser
+                    }
+                }
+            }
+        });
+        
+        // Xử lý gửi form cho cả Thêm và Sửa
+        userForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('userId').value;
+            const userData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+            };
+            
+            try {
+                if (id) { // Đang sửa người dùng hiện có
+                    const updatedUser = await updateUser(id, userData);
+                    // Cập nhật giao diện thủ công sau PUT
+                    const index = allUsers.findIndex(u => u.id === parseInt(id));
+                    if (index !== -1) {
+                        allUsers[index] = { ...allUsers[index], ...userData };
+                    }
+                    alert('Cập nhật người dùng thành công!');
+                } else { // Đang thêm người dùng mới
+                    const newUser = await addUser(userData);
+                    // Cập nhật giao diện thủ công sau POST
+                    // JSONPlaceholder trả về id 11, nhưng chúng ta tạo id duy nhất
+                    newUser.id = allUsers.length > 0 ? Math.max(...allUsers.map(u => u.id)) + 1 : 1;
+                    allUsers.push(newUser);
+                    alert('Thêm người dùng thành công!');
+                }
+                
+                closeModal();
+                filterAndRender();
+            } catch (error) {
+                // Lỗi đã được xử lý trong các hàm API
+            }
+        });
+
+        // --- 4. Xử lý Modal ---
+        const openModal = (mode, user = null) => {
+            userForm.reset();
+            if (mode === 'edit') {
+                modalTitle.textContent = 'Chỉnh sửa người dùng';
+                document.getElementById('userId').value = user.id;
+                document.getElementById('name').value = user.name;
+                document.getElementById('email').value = user.email;
+                document.getElementById('phone').value = user.phone;
+            } else {
+                modalTitle.textContent = 'Thêm người dùng mới';
+                document.getElementById('userId').value = '';
+            }
+            modal.style.display = 'block';
+        };
+        
+        const closeModal = () => {
+            modal.style.display = 'none';
+        };
+        
+        addUserBtn.addEventListener('click', () => openModal('add'));
+        cancelBtn.addEventListener('click', closeModal);
+        window.addEventListener('click', (e) => {
+            if (e.target == modal) {
+                closeModal();
+            }
+        });
+
+        // --- 5. Khởi tạo ---
+        
+        // Hàm hỗ trợ để áp dụng lại bộ lọc và hiển thị lại
+        const filterAndRender = () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            filteredUsers = allUsers.filter(user => 
+                user.name.toLowerCase().includes(searchTerm)
+            );
+            renderTable();
+            renderPagination();
+        };
+
+        // Hàm chính để khởi động ứng dụng
+        const initializeApp = async () => {
+            tableBody.innerHTML = '<tr><td colspan="5" class="loading">Đang tải dữ liệu...</td></tr>';
+            allUsers = await fetchUsers();
+            filteredUsers = [...allUsers]; // Ban đầu, danh sách lọc là tất cả
+            renderTable();
+            renderPagination();
+        };
+
+        // Khởi động ứng dụng
+        initializeApp();
+
+    </script>
+</body>
+</html>
