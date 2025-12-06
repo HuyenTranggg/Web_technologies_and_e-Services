@@ -1,13 +1,23 @@
+// ===== BÀI 3: THIẾT LẬP ROUTING CHO ỨNG DỤNG =====
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './index.css';
 import App from './App';
+import EditStudent from './EditStudent';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <Routes>
+        {/* Trang chủ - Danh sách học sinh */}
+        <Route path="/" element={<App />} />
+        {/* Trang chỉnh sửa học sinh */}
+        <Route path="/edit/:id" element={<EditStudent />} />
+      </Routes>
+    </BrowserRouter>
   </React.StrictMode>
 );
 
